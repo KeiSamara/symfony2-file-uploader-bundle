@@ -48,6 +48,39 @@ class FileUploader
     }
 
     /**
+     * TODO: think where to place this method
+     * TODO: temporary solution
+     * Splits file name to path
+     * method is usefull when storing large amount on files
+     */
+    public function splitFileNameToPath($name, $chunks = 4)
+    {
+        if (!$name) {
+            return null;
+        }
+
+        $hash = md5($name);
+
+        $symbols = str_split($hash);
+
+        $lastPart = '';
+        $path = '';
+        $i = 0;
+        foreach ($symbols as $symbol) {
+            $i++;
+            if ($i > $chunks) {
+                break;
+            }
+            $lastPart .= $symbol;
+            $path = $path . $lastPart . '/';
+        }
+
+        $path .= $name;
+
+        return $path;
+    }
+
+    /**
      * Handles a file upload. Call this from an action, after validating the user's
      * right to upload and delete files and determining your 'folder' option. A good
      * example:
@@ -111,7 +144,13 @@ class FileUploader
                 'image_versions' => $sizes,
                 'accept_file_types' => $allowedExtensionsRegex,
                 'max_number_of_files' => $options['max_number_of_files'],
-            ));
+                'max_file_size' => $options['max_file_size'],
+                'min_file_size' => $options['min_file_size']
+            ),
+            false,
+            $options['error_messages']
+            // disable initialization
+        );
 
         // From https://github.com/blueimp/jQuery-File-Upload/blob/master/server/php/index.php
         // There's lots of REST fanciness here to support different upload methods, so we're
